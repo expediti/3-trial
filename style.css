@@ -1,52 +1,83 @@
-let videosData = [];
-
-fetch("videos.json")
-  .then(res => res.json())
-  .then(data => {
-    videosData = data;
-    renderVideos(data);
-  });
-
-function renderVideos(videos) {
-  const container = document.getElementById("videoContainer");
-  container.innerHTML = "";
-
-  videos.forEach(video => {
-    const card = document.createElement("div");
-    card.className = "video-card";
-
-    card.innerHTML = `
-      <img src="${video.thumbnailUrl || 'https://via.placeholder.com/300x200'}">
-      <div class="content">
-        <h3>${video.title}</h3>
-        <p>${video.category} • ${video.duration}</p>
-      </div>
-    `;
-
-    card.onclick = () => openModal(video);
-    container.appendChild(card);
-  });
+* {
+  box-sizing: border-box;
+  font-family: Arial, sans-serif;
 }
 
-// Modal
-function openModal(video) {
-  document.getElementById("videoModal").style.display = "block";
-  document.getElementById("modalTitle").innerText = video.title;
-  document.getElementById("modalDesc").innerText = video.description;
-  document.getElementById("modalVideo").src = video.embedUrl;
+body {
+  margin: 0;
+  background: #f5f5f5;
 }
 
-document.getElementById("closeModal").onclick = () => {
-  document.getElementById("videoModal").style.display = "none";
-  document.getElementById("modalVideo").src = "";
-};
+header {
+  background: #111;
+  color: white;
+  padding: 15px;
+  text-align: center;
+}
 
-// Search
-document.getElementById("searchInput").addEventListener("input", e => {
-  const value = e.target.value.toLowerCase();
-  const filtered = videosData.filter(v =>
-    v.title.toLowerCase().includes(value) ||
-    v.category.toLowerCase().includes(value)
-  );
-  renderVideos(filtered);
-});
+header input {
+  margin-top: 10px;
+  padding: 8px;
+  width: 60%;
+  max-width: 400px;
+}
+
+.video-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 15px;
+  padding: 20px;
+}
+
+.video-card {
+  background: white;
+  border-radius: 8px;
+  overflow: hidden;
+  cursor: pointer;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+}
+
+.video-card img {
+  width: 100%;
+  height: 140px;
+  object-fit: cover;
+}
+
+.video-card .content {
+  padding: 10px;
+}
+
+.video-card h3 {
+  font-size: 14px;
+  margin: 0;
+}
+
+.video-card p {
+  font-size: 12px;
+  color: gray;
+}
+
+/* Modal */
+.modal {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.8);
+}
+
+.modal-content {
+  background: white;
+  width: 80%;
+  max-width: 700px;
+  margin: 5% auto;
+  padding: 20px;
+  position: relative;
+}
+
+#closeModal {
+  position: absolute;
+  right: 10px;
+  top: 5px;
+  font-size: 28px;
+  cursor: pointer;
+}
