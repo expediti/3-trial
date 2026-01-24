@@ -1,45 +1,42 @@
-// Configuration
-const ITEMS_PER_PAGE = 12; // 12 videos per page
-let allVideos = [];     // Master list
-let currentList = [];   // Filtered list
+// --- CONFIGURATION ---
+const ITEMS_PER_PAGE = 15; // As requested, 12-15 videos
+let allVideos = [];
+let currentList = [];
 let currentPage = 1;
 
-// Initialize
+// --- INITIALIZATION ---
 document.addEventListener('DOMContentLoaded', () => {
+    // 1. Fetch Data
     fetch('videos.json')
         .then(res => res.json())
         .then(data => {
-            // Apply Hourly Rotation
-            const rotatedData = rotateByHour(data);
-            
-            allVideos = rotatedData;
-            currentList = rotatedData;
-            
-            populateFilters();
-            populateTrending();
-            renderPage(1);
+            // Apply Hourly Rotation Logic
+            allVideos = rotateByHour(data);
+            currentList = allVideos;
+
+            // 2. Determine Page Type
+            if (document.body.classList.contains('page-home')) {
+                initHomePage();
+            } else if (document.body.classList.contains('page-watch')) {
+                initWatchPage();
+            }
         })
-        .catch(err => console.error("Error loading videos.json:", err));
+        .catch(err => console.error("Error loading DB:", err));
 });
 
-/**
- * Rotates video order based on the current hour.
- * Uses the hour as a seed for a pseudo-random shuffle.
- */
+// --- UTILS: Hourly Rotation ---
 function rotateByHour(data) {
-    const hour = new Date().getHours(); 
-    // Clone data to avoid mutating original immediately
+    const hour = new Date().getHours();
     let array = [...data];
+    let seed = hour; // Use current hour as seed
     
-    // Seeded shuffle algorithm
-    let m = array.length, t, i;
-    let seed = hour; // Using hour as seed
-
+    // Simple seeded shuffle
     const random = () => {
-        var x = Math.sin(seed++) * 10000;
+        let x = Math.sin(seed++) * 10000;
         return x - Math.floor(x);
     };
 
+    let m = array.length, t, i;
     while (m) {
         i = Math.floor(random() * m--);
         t = array[m];
@@ -49,78 +46,84 @@ function rotateByHour(data) {
     return array;
 }
 
-// Render the main grid
-function renderPage(page) {
+// --- HOME PAGE LOGIC ---
+function initHomePage() {
+    populateTagFilter();
+    renderSidebarTrending();
+    renderGrid(1);
+
+    // Search Listener
+    document.getElementById('searchInput').addEventListener('keyup', (e) => {
+        if(e.key === 'Enter') performSearch();
+    });
+}
+
+function renderGrid(page) {
     const grid = document.getElementById('video-grid');
     grid.innerHTML = '';
-    
+
     const start = (page - 1) * ITEMS_PER_PAGE;
     const end = start + ITEMS_PER_PAGE;
-    const videosToShow = currentList.slice(start, end);
+    const pageItems = currentList.slice(start, end);
 
-    if(videosToShow.length === 0) {
-        grid.innerHTML = '<p style="padding:20px">No videos found matching criteria.</p>';
+    if (pageItems.length === 0) {
+        grid.innerHTML = '<p style="padding:20px">No results found.</p>';
         return;
     }
 
-    videosToShow.forEach(video => {
+    pageItems.forEach(video => {
         const card = document.createElement('div');
         card.className = 'video-card';
-        card.onclick = () => openPlayer(video);
-        
-        // Thumbnail handling
-        const thumb = video.thumbnailUrl || 'https://via.placeholder.com/600x340/000?text=No+Img';
+        // Open watch.html with video ID
+        card.onclick = () => window.location.href = `watch.html?id=${video.id}`;
+
+        const thumb = video.thumbnailUrl || 'https://via.placeholder.com/400x225/000?text=No+Preview';
 
         card.innerHTML = `
-            <div class="thumb-wrapper">
-                <img src="${thumb}" alt="thumb">
+            <div class="thumb">
+                <img src="${thumb}" alt="${video.title}">
                 <span class="duration">${video.duration}</span>
             </div>
-            <div class="info">
-                <h3>${video.title}</h3>
-                <p>${video.views} views • ${new Date(video.uploadedAt).toLocaleDateString()}</p>
+            <div class="card-info">
+                <h3 class="card-title">${video.title}</h3>
+                <div class="card-meta">
+                    <span>${video.category}</span> • 
+                    <span>${video.views} views</span>
+                </div>
             </div>
         `;
         grid.appendChild(card);
     });
 
-    updatePagination();
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-}
-
-// Pagination Logic
-function updatePagination() {
+    // Update Pagination UI
     const totalPages = Math.ceil(currentList.length / ITEMS_PER_PAGE);
     document.getElementById('pageIndicator').innerText = `Page ${currentPage} of ${totalPages || 1}`;
-    
     document.getElementById('prevBtn').disabled = (currentPage === 1);
     document.getElementById('nextBtn').disabled = (currentPage >= totalPages);
 }
 
 function changePage(dir) {
     currentPage += dir;
-    renderPage(currentPage);
+    renderGrid(currentPage);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
-// Search Feature (Title only)
 function performSearch() {
     const query = document.getElementById('searchInput').value.toLowerCase();
-    
-    if(!query) {
+    if (!query) {
         currentList = allVideos;
     } else {
         currentList = allVideos.filter(v => v.title.toLowerCase().includes(query));
     }
     currentPage = 1;
-    renderPage(1);
+    renderGrid(1);
 }
 
-// Filter Feature (By Tags)
-function populateFilters() {
+function populateTagFilter() {
     const tags = new Set();
     allVideos.forEach(v => v.tags.forEach(t => tags.add(t)));
-    
     const select = document.getElementById('tagFilter');
+    
     tags.forEach(tag => {
         const opt = document.createElement('option');
         opt.value = tag;
@@ -130,84 +133,75 @@ function populateFilters() {
 }
 
 function applyFilter() {
-    const tag = document.getElementById('tagFilter').value;
-    if(tag === 'all') {
-        currentList = allVideos;
-    } else {
-        currentList = allVideos.filter(v => v.tags.includes(tag));
-    }
+    const val = document.getElementById('tagFilter').value;
+    if (val === 'all') currentList = allVideos;
+    else currentList = allVideos.filter(v => v.tags.includes(val));
     currentPage = 1;
-    renderPage(1);
+    renderGrid(1);
 }
 
-// Recent/Trending Sidebar
-function populateTrending() {
-    // Sort by Date (Newest first)
-    const recent = [...allVideos].sort((a,b) => new Date(b.uploadedAt) - new Date(a.uploadedAt)).slice(0, 8);
+function renderSidebarTrending() {
+    const container = document.getElementById('sidebar-list');
+    // Just pick first 5 from rotated list as "trending"
+    const trending = allVideos.slice(0, 5); 
     
-    const container = document.getElementById('trending-container');
-    container.innerHTML = '';
-
-    recent.forEach(v => {
-        const div = document.createElement('div');
-        div.className = 'side-item';
-        div.onclick = () => openPlayer(v);
-        div.innerHTML = `
-            <img src="${v.thumbnailUrl || 'https://via.placeholder.com/100'}" alt="t">
-            <div class="side-info">
-                <h4>${v.title.substring(0, 30)}...</h4>
-                <small>${v.views} views</small>
-            </div>
-        `;
-        container.appendChild(div);
+    trending.forEach(v => {
+        const item = createListItem(v);
+        container.appendChild(item);
     });
 }
 
-// Video Player Modal & Related Videos
-function openPlayer(video) {
-    const modal = document.getElementById('videoModal');
-    const iframe = document.getElementById('videoFrame');
-    
-    // Set Video
-    iframe.src = video.embedUrl;
-    document.getElementById('modalTitle').innerText = video.title;
-    document.getElementById('modalViews').innerText = `${video.views} views`;
-    document.getElementById('modalDate').innerText = new Date(video.uploadedAt).toDateString();
+// --- WATCH PAGE LOGIC ---
+function initWatchPage() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const videoId = urlParams.get('id');
 
-    // Populate Related Videos (Matching Tags)
-    const relatedContainer = document.getElementById('related-container');
-    relatedContainer.innerHTML = '';
-    
-    const related = allVideos.filter(v => 
-        v.id !== video.id && v.tags.some(t => video.tags.includes(t))
-    ).slice(0, 10);
+    const video = allVideos.find(v => v.id === videoId);
 
+    if (!video) {
+        document.getElementById('videoTitle').innerText = "Video not found.";
+        return;
+    }
+
+    // Populate Player
+    document.getElementById('mainPlayer').src = video.embedUrl;
+    document.getElementById('videoTitle').innerText = video.title;
+    document.getElementById('videoViews').innerText = `${video.views} views`;
+    document.getElementById('videoDate').innerText = new Date(video.uploadedAt).toDateString();
+    document.getElementById('videoDescription').innerText = video.description;
+
+    // Populate Tags
+    const tagsDiv = document.getElementById('videoTags');
+    video.tags.forEach(t => {
+        const span = document.createElement('span');
+        span.className = 'tag';
+        span.innerText = `#${t}`;
+        tagsDiv.appendChild(span);
+    });
+
+    // Populate Related Videos (based on category or tags)
+    const relatedList = document.getElementById('related-list');
+    const related = allVideos.filter(v => v.id !== video.id && v.tags.some(t => video.tags.includes(t))).slice(0, 10);
+    
     related.forEach(v => {
-        const div = document.createElement('div');
-        div.className = 'side-item';
-        div.onclick = () => openPlayer(v);
-        div.innerHTML = `
-            <img src="${v.thumbnailUrl || 'https://via.placeholder.com/100'}" alt="t">
-            <div class="side-info">
-                <h4>${v.title.substring(0, 30)}...</h4>
-                <small>${v.duration}</small>
-            </div>
-        `;
-        relatedContainer.appendChild(div);
+        relatedList.appendChild(createListItem(v));
     });
-
-    modal.style.display = "block";
 }
 
-function closePlayer() {
-    const modal = document.getElementById('videoModal');
-    const iframe = document.getElementById('videoFrame');
-    iframe.src = ""; // Stop playback
-    modal.style.display = "none";
-}
+// --- HELPER: Create Small List Item (Sidebar/Related) ---
+function createListItem(video) {
+    const div = document.createElement('div');
+    div.className = 'list-item';
+    div.onclick = () => window.location.href = `watch.html?id=${video.id}`;
+    
+    const thumb = video.thumbnailUrl || 'https://via.placeholder.com/160x90/000?text=Wait';
 
-// Close on outside click
-window.onclick = function(e) {
-    const modal = document.getElementById('videoModal');
-    if (e.target == modal) closePlayer();
+    div.innerHTML = `
+        <img src="${thumb}" alt="thumb">
+        <div class="list-item-info">
+            <h4>${video.title}</h4>
+            <span>${video.views} views</span>
+        </div>
+    `;
+    return div;
 }
