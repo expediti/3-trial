@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Xshiver - Video Streaming</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body class="page-watch">
+
+    <header>
+        <div class="logo"><a href="index.html">Xshiver<span class="highlight">Hub</span></a></div>
+        <div class="search-bar">
+            <input type="text" id="searchInput" placeholder="Search videos...">
+            <button onclick="performSearch()"><i class="fas fa-search"></i></button>
+        </div>
+    </header>
+
+    <main class="watch-container">
+        
+        <section class="player-section">
+            <div class="video-frame-wrapper">
+                <iframe id="mainPlayer" src="" frameborder="0" allowfullscreen allow="autoplay"></iframe>
+            </div>
+            
+            <div class="video-details">
+                <h1 id="videoTitle">Loading...</h1>
+                <div class="video-stats">
+                    <span id="videoViews">-- views</span>
+                    <span id="videoDate">--</span>
+                </div>
+                <hr>
+                <div class="video-desc">
+                    <p id="videoDescription"></p>
+                    <div id="videoTags" class="tags-cloud"></div>
+                </div>
+            </div>
+        </section>
+
+        <aside class="related-section">
+            <h3>Related Videos</h3>
+            <div id="related-list" class="related-list">
+                </div>
+        </aside>
+
+    </main>
+
+    <footer>
+        <div class="footer-content">
+            <p>&copy; 2026 XshiverHub. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>
