@@ -1,95 +1,31 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Video Gallery - Scraped Videos</title>
-    <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8">
+  <title>Video Gallery</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <header>
-        <div class="container">
-            <h1>🎬 Video Gallery</h1>
-            <p class="subtitle">Videos scraped from the web</p>
-        </div>
-    </header>
 
-    <main class="container">
-        <!-- Video Player Section -->
-        <section id="video-player-section" class="hidden">
-            <div class="video-player-wrapper">
-                <button id="close-player" class="close-btn">✕</button>
-                <div class="video-container">
-                    <video id="main-video-player" controls autoplay>
-                        <source id="video-source" src="" type="video/mp4">
-                        Your browser does not support the video tag.
-                    </video>
-                </div>
-                <div class="video-info">
-                    <h2 id="video-title">Video Title</h2>
-                    <p id="video-details" class="video-details"></p>
-                </div>
-            </div>
-        </section>
+  <header>
+    <h1>My Video Website</h1>
+    <input type="text" id="searchInput" placeholder="Search videos...">
+  </header>
 
-        <!-- Stats Section -->
-        <section class="stats">
-            <div class="stat-card">
-                <span class="stat-number" id="total-videos">0</span>
-                <span class="stat-label">Total Videos</span>
-            </div>
-            <div class="stat-card">
-                <span class="stat-number" id="mp4-count">0</span>
-                <span class="stat-label">MP4 Videos</span>
-            </div>
-            <div class="stat-card">
-                <span class="stat-number" id="m3u8-count">0</span>
-                <span class="stat-label">M3U8 Streams</span>
-            </div>
-        </section>
+  <main>
+    <div id="videoContainer" class="video-grid"></div>
+  </main>
 
-        <!-- Search and Filter -->
-        <section class="controls">
-            <input type="text" id="search-box" placeholder="🔍 Search videos..." class="search-input">
-            <select id="filter-type" class="filter-select">
-                <option value="all">All Types</option>
-                <option value="mp4">MP4</option>
-                <option value="m3u8">M3U8</option>
-                <option value="webm">WebM</option>
-                <option value="other">Other</option>
-            </select>
-        </section>
+  <!-- Modal Player -->
+  <div id="videoModal" class="modal">
+    <div class="modal-content">
+      <span id="closeModal">&times;</span>
+      <h2 id="modalTitle"></h2>
+      <video id="modalVideo" controls width="100%"></video>
+      <p id="modalDesc"></p>
+    </div>
+  </div>
 
-        <!-- Video Grid -->
-        <section id="video-grid" class="video-grid">
-            <!-- Videos will be loaded here by JavaScript -->
-        </section>
-
-        <!-- Empty State -->
-        <section id="empty-state" class="empty-state">
-            <div class="empty-content">
-                <span class="empty-icon">📹</span>
-                <h2>No Videos Found</h2>
-                <p>Run the scraper bot to add videos to your database.</p>
-                <div class="empty-instructions">
-                    <h3>Quick Start:</h3>
-                    <ol>
-                        <li>Open terminal in project folder</li>
-                        <li>Run: <code>python scraper_bot.py</code></li>
-                        <li>Enter the URL to scrape</li>
-                        <li>Refresh this page</li>
-                    </ol>
-                </div>
-            </div>
-        </section>
-    </main>
-
-    <footer>
-        <div class="container">
-            <p>Video Scraper Bot © 2024 | Videos loaded from local database</p>
-        </div>
-    </footer>
-
-    <script src="script.js"></script>
+  <script src="script.js"></script>
 </body>
 </html>
