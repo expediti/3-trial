@@ -1,64 +1,23 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Xshiver - Video Streaming</title>
-    <link rel="stylesheet" href="style.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <title>My Video Website</title>
+  <link rel="stylesheet" href="style.css">
 </head>
-<body class="page-home">
+<body>
 
-    <header>
-        <div class="logo"><a href="index.html"> <span class="highlight">Xshiver</span></a></div>
-        <div class="search-bar">
-            <input type="text" id="searchInput" placeholder="Search videos...">
-            <button onclick="performSearch()"><i class="fas fa-search"></i></button>
-        </div>
-        <!-- <div class="mobile-menu-btn"><i class="fas fa-bars"></i></div> -->
-    </header>
+  <h1>🎬 Video Gallery</h1>
 
-    <main class="container">
-        <aside class="sidebar">
-            <div class="filter-section">
-                <h3>Filter by Tag</h3>
-                
-                <select id="tagFilter" onchange="applyFilter()">
-                    <option value="all">All Categories</option>
-                </select>
-                
-            </div>
-            
-            <div class="trending-section">
-                <h3><i class="fas fa-fire"></i> Trending Now</h3>
-                <div id="sidebar-list">
-                    </div>
-            </div>
-        </aside>
+  <div id="video-container"></div>
 
-        <section class="content-area">
-            <div id="video-grid" class="video-grid">
-                </div>
+  <!-- Modal Player -->
+  <div id="playerModal" class="modal">
+    <div class="modal-content">
+      <span id="closeBtn">&times;</span>
+      <iframe id="videoFrame" allowfullscreen></iframe>
+    </div>
+  </div>
 
-            <div class="pagination">
-                <button id="prevBtn" onclick="changePage(-1)">Previous</button>
-                <span id="pageIndicator">Page 1</span>
-                <button id="nextBtn" onclick="changePage(1)">Next</button>
-            </div>
-        </section>
-    </main>
-
-    <footer>
-        <div class="footer-content">
-            <p>&copy; 2026 Xshiver. All rights reserved.</p>
-            <div class="footer-links">
-                <a href="#">Privacy Policy</a>
-                <a href="#">Terms of Service</a>
-                <a href="#">Contact</a>
-            </div>
-        </div>
-    </footer>
-
-    <script src="script.js"></script>
+  <script src="script.js"></script>
 </body>
 </html>
