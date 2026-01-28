@@ -1,82 +1,44 @@
-let allVideos = [];
+const videoGrid = document.getElementById("videoGrid");
+const videoPlayer = document.getElementById("videoPlayer");
+const videoSource = document.getElementById("videoSource");
+const videoTitle = document.getElementById("videoTitle");
+const videoDescription = document.getElementById("videoDescription");
 
+// Load videos from JSON
 fetch("videos.json")
-  .then(res => res.json())
-  .then(data => {
-    allVideos = data;
-    renderVideos(allVideos);
-    loadCategories(allVideos);
-  });
+  .then(response => response.json())
+  .then(videos => {
+    videos.forEach(video => createVideoCard(video));
 
-const grid = document.getElementById("videoGrid");
-const modal = document.getElementById("playerModal");
-const frame = document.getElementById("playerFrame");
-const titleEl = document.getElementById("playerTitle");
-const descEl = document.getElementById("playerDesc");
-const suggestionsList = document.getElementById("suggestionsList");
-
-function renderVideos(videos) {
-  grid.innerHTML = "";
-  videos.forEach(video => {
-    const card = document.createElement("div");
-    card.className = "card";
-    card.innerHTML = `
-      <img src="${video.thumbnailUrl}">
-      <div class="info">
-        <h4>${video.title}</h4>
-        <small>${video.duration}</small>
-      </div>
-    `;
-    card.onclick = () => openPlayer(video);
-    grid.appendChild(card);
-  });
-}
-
-function openPlayer(video) {
-  modal.style.display = "block";
-  frame.src = video.embedUrl;
-  titleEl.textContent = video.title;
-  descEl.textContent = video.description;
-
-  suggestionsList.innerHTML = "";
-  video.suggestions.forEach(s => {
-    const li = document.createElement("li");
-    li.textContent = s;
-    suggestionsList.appendChild(li);
-  });
-}
-
-document.querySelector(".close").onclick = () => {
-  modal.style.display = "none";
-  frame.src = "";
-};
-
-// Search
-document.getElementById("searchInput").addEventListener("input", e => {
-  const q = e.target.value.toLowerCase();
-  const filtered = allVideos.filter(v =>
-    v.title.toLowerCase().includes(q)
-  );
-  renderVideos(filtered);
-});
-
-// Categories
-function loadCategories(videos) {
-  const select = document.getElementById("categoryFilter");
-  const categories = [...new Set(videos.map(v => v.category))];
-
-  categories.forEach(cat => {
-    const opt = document.createElement("option");
-    opt.value = cat;
-    opt.textContent = cat;
-    select.appendChild(opt);
-  });
-
-  select.onchange = () => {
-    if (select.value === "all") {
-      renderVideos(allVideos);
-    } else {
-      renderVideos(allVideos.filter(v => v.category === select.value));
+    // Auto play first video
+    if (videos.length > 0) {
+      playVideo(videos[0]);
     }
-  };
+  })
+  .catch(err => console.error("Error loading videos:", err));
+
+function createVideoCard(video) {
+  const card = document.createElement("div");
+  card.className = "video-card";
+
+  card.innerHTML = `
+    <img src="${video.thumbnailUrl}" alt="${video.title}">
+    <div class="info">
+      <h4>${video.title}</h4>
+      <span>${video.duration}</span>
+    </div>
+  `;
+
+  card.addEventListener("click", () => playVideo(video));
+  videoGrid.appendChild(card);
+}
+
+function playVideo(video) {
+  videoSource.src = video.embedUrl;
+  videoPlayer.load();
+  videoPlayer.play();
+
+  videoTitle.textContent = video.title;
+  videoDescription.textContent = video.description;
+  videoPlayer.poster = video.thumbnailUrl;
 }
