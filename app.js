@@ -4,138 +4,81 @@ const SOURCES = {
   Lol49: "data/lol49.json"
 };
 
-let activeSource = "Fuckmaza";
-let allVideos = [];
+let activeCategory = "Fuckmaza";
+let cache = {};
 let currentVideos = [];
+let page = 1;
+const PER_PAGE = 16;
 
-// ---------- HOURLY ROTATION ----------
 function rotate(arr, seed) {
-  return [...arr].sort((a,b)=>
-    (a.id.charCodeAt(0)+seed) - (b.id.charCodeAt(0))
-  );
+  return [...arr].sort((a,b)=> (a.id.charCodeAt(0)+seed)-(b.id.charCodeAt(0)));
 }
 
-// ---------- LOAD JSON ----------
-async function loadCategory(name) {
-  activeSource = name;
-  try {
+async function loadCategory(name){
+  activeCategory=name;
+  page=1;
+
+  if(!cache[name]){
     const res = await fetch(SOURCES[name]);
     const data = await res.json();
-
-    const seed = new Date().getHours() + name.length;
-    currentVideos = rotate(data, seed);
-    allVideos = Object.values(window.cache || {}).flat();
-
-    window.cache[name] = data;
-
-    updateUI();
-  } catch {
-    alert(`${name} unavailable. Try another category.`);
+    const seed = new Date().getHours()+name.length;
+    cache[name] = rotate(data,seed);
   }
+
+  currentVideos = cache[name];
+  updateCategoryUI();
+  renderPage();
 }
 
-// ---------- UI ----------
-function updateUI() {
-  document.getElementById("activeCategory").innerText = activeSource;
-
-  const sub = currentVideos[0]?.tags?.find(t=>t!==activeSource.toLowerCase());
-  document.getElementById("activeSubcategory").innerText =
-    sub ? `Subcategory: ${sub}` : "";
-
-  renderGrid(currentVideos);
+function updateCategoryUI(){
+  document.getElementById("activeCategory").innerText = activeCategory;
+  const tag = currentVideos[0]?.tags?.[1];
+  document.getElementById("activeSubcategory").innerText = tag ? "Subcategory: "+tag : "";
 }
 
-function renderGrid(list) {
+function renderPage(){
   const grid = document.getElementById("videoGrid");
-  if (!grid) return;
-
   grid.innerHTML = "";
-  list.forEach(v=>{
-    const d = document.createElement("div");
+
+  const start=(page-1)*PER_PAGE;
+  const items=currentVideos.slice(start,start+PER_PAGE);
+
+  items.forEach(v=>{
+    const d=document.createElement("div");
     d.className="card";
-    d.innerHTML=`
-      <img src="${v.thumbnailUrl}">
-      <div class="info">
-        <b>${v.title}</b><br>
-        ${v.duration} • ${v.views} views
-      </div>
-    `;
+    d.innerHTML=`<img src="${v.thumbnailUrl}"><div class="info">${v.title}</div>`;
     d.onclick=()=>location=`watch.html?id=${v.id}`;
     grid.appendChild(d);
   });
+
+  const totalPages=Math.ceil(currentVideos.length/PER_PAGE);
+  document.getElementById("pageInfo").innerText=`Page ${page} of ${totalPages}`;
+  prevBtn.disabled=page===1;
+  nextBtn.disabled=page>=totalPages;
 }
 
-// ---------- HEADER ----------
-function initHeader() {
-  const nav = document.getElementById("categoryTabs");
-  if (!nav) return;
+prevBtn.onclick=()=>{page--;renderPage()};
+nextBtn.onclick=()=>{page++;renderPage()};
 
-  Object.keys(SOURCES).forEach(name=>{
+function initCategories(){
+  const nav=document.getElementById("categoryTabs");
+  Object.keys(SOURCES).forEach(c=>{
     const b=document.createElement("button");
-    b.innerText=name;
-    b.onclick=()=>loadCategory(name);
+    b.innerText=c;
+    b.onclick=()=>loadCategory(c);
     nav.appendChild(b);
   });
 }
 
-// ---------- SEARCH (ALL JSON FILES) ----------
-function initSearch() {
-  const s=document.getElementById("searchInput");
-  if(!s)return;
+searchInput.oninput=()=>{
+  const q=searchInput.value.toLowerCase();
+  const all=Object.values(cache).flat();
+  currentVideos = all.filter(v=>v.title.toLowerCase().includes(q));
+  page=1;
+  renderPage();
+};
 
-  s.oninput=()=>{
-    const q=s.value.toLowerCase();
-    const merged=Object.values(window.cache).flat();
-    renderGrid(merged.filter(v=>v.title.toLowerCase().includes(q)));
-  };
-}
-
-// ---------- WATCH PAGE ----------
-async function initWatch() {
-  const id=new URLSearchParams(location.search).get("id");
-  if(!id)return;
-
-  for(const src of Object.values(SOURCES)){
-    try{
-      const res=await fetch(src);
-      const data=await res.json();
-      const v=data.find(x=>x.id===id);
-      if(v){
-        player.src=v.embedUrl;
-        title.innerText=v.title;
-        description.innerText=v.description;
-
-        v.tags.forEach(t=>{
-          const s=document.createElement("span");
-          s.innerText=`#${t}`;
-          tags.appendChild(s);
-        });
-
-        renderRelated(v,data);
-        break;
-      }
-    }catch{}
-  }
-}
-
-function renderRelated(cur,all){
-  related.innerHTML="";
-  all.filter(v=>v.id!==cur.id && v.tags.some(t=>cur.tags.includes(t)))
-    .slice(0,6)
-    .forEach(v=>{
-      const d=document.createElement("div");
-      d.className="card";
-      d.innerHTML=`<img src="${v.thumbnailUrl}"><div class="info">${v.title}</div>`;
-      d.onclick=()=>location=`watch.html?id=${v.id}`;
-      related.appendChild(d);
-    });
-}
-
-// ---------- INIT ----------
-window.cache={};
 document.addEventListener("DOMContentLoaded",()=>{
-  initHeader();
-  initSearch();
-  loadCategory(activeSource);
-  initWatch();
+  initCategories();
+  loadCategory(activeCategory);
 });
