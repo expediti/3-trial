@@ -1,57 +1,28 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Xshiver - Watch</title>
-    <link rel="stylesheet" href="style.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <meta charset="UTF-8" />
+  <title>Watch</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="style.css" />
 </head>
-<body class="page-watch">
+<body>
 
-    <header>
-        <div class="logo"><a href="index.html"> <span class="highlight">Xshiver</span></a></div>
-        <div class="search-bar">
-            <input type="text" id="searchInput" placeholder="Search videos...">
-            <button onclick="performSearch()"><i class="fas fa-search"></i></button>
-        </div>
-    </header>
+<header>
+  <a href="index.html" class="logo">StreamHub</a>
+</header>
 
-    <main class="watch-container">
-        
-        <section class="player-section">
-            <div class="video-frame-wrapper">
-                <iframe id="mainPlayer" src="" frameborder="0" allowfullscreen allow="autoplay"></iframe>
-            </div>
-            
-            <div class="video-details">
-                <h1 id="videoTitle">Loading...</h1>
-                <div class="video-stats">
-                    <span id="videoViews">-- views</span>
-                    <span id="videoDate">--</span>
-                </div>
-                <hr>
-                <div class="video-desc">
-                    <p id="videoDescription"></p>
-                    <div id="videoTags" class="tags-cloud"></div>
-                </div>
-            </div>
-        </section>
+<main class="watch-layout">
+  <video id="player" controls playsinline></video>
 
-        <aside class="related-section">
-            <h3>Related Videos</h3>
-            <div id="related-list" class="related-list">
-                </div>
-        </aside>
+  <h1 id="title"></h1>
+  <p id="description"></p>
+  <div id="tags"></div>
 
-    </main>
+  <h3>Related Videos</h3>
+  <div id="related" class="grid small"></div>
+</main>
 
-    <footer>
-        <div class="footer-content">
-            <p>&copy; 2026 Xshiver. All rights reserved.</p>
-        </div>
-    </footer>
-
-    <script src="script.js"></script>
+<script src="app.js"></script>
 </body>
 </html>
