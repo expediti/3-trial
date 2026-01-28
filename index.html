@@ -2,27 +2,33 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Video Streaming Site</title>
+  <title>Video Streaming Website</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-<header>
-  <h1>My Video Hub</h1>
-</header>
+  <header>
+    <h1>🔥 Video Streaming Platform</h1>
+  </header>
 
-<div class="container">
-  <div id="video-grid" class="grid"></div>
-</div>
+  <main>
+    <!-- Video Player -->
+    <div class="player-container">
+      <video id="videoPlayer" controls poster="">
+        <source id="videoSource" src="" type="video/mp4">
+        Your browser does not support video playback.
+      </video>
 
-<!-- Video Modal -->
-<div id="playerModal" class="modal">
-  <span class="close" onclick="closePlayer()">&times;</span>
-  <video id="videoPlayer" controls autoplay></video>
-  <h2 id="videoTitle"></h2>
-  <p id="videoDesc"></p>
-</div>
+      <div class="video-info">
+        <h2 id="videoTitle">Select a video</h2>
+        <p id="videoDescription"></p>
+      </div>
+    </div>
 
-<script src="app.js"></script>
+    <!-- Video Thumbnails -->
+    <div class="video-grid" id="videoGrid"></div>
+  </main>
+
+  <script src="script.js"></script>
 </body>
 </html>
