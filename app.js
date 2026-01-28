@@ -4,68 +4,65 @@ const SOURCES = {
   Lol49: "data/lol49.json"
 };
 
-const PER_PAGE = 12;
-let activeCategory = "Fuckmaza";
-let page = 1;
-let currentList = [];
-let cache = {};
+let activeSource = "Fuckmaza";
+let allVideos = [];
+let currentVideos = [];
 
-// ---------- UTILS ----------
-const ensureViews = v => v < 1000 ? v + 1000 : v;
-
+// ---------- HOURLY ROTATION ----------
 function rotate(arr, seed) {
   return [...arr].sort((a,b)=>
-    (a.id.charCodeAt(0)+seed)-(b.id.charCodeAt(0))
+    (a.id.charCodeAt(0)+seed) - (b.id.charCodeAt(0))
   );
 }
 
-// ---------- LOAD CATEGORY ----------
-async function loadCategory(cat) {
-  activeCategory = cat;
-  page = 1;
-
+// ---------- LOAD JSON ----------
+async function loadCategory(name) {
+  activeSource = name;
   try {
-    if (!cache[cat]) {
-      const res = await fetch(SOURCES[cat]);
-      let data = await res.json();
+    const res = await fetch(SOURCES[name]);
+    const data = await res.json();
 
-      data.forEach(v => v.views = ensureViews(v.views || 0));
-      cache[cat] = rotate(data, new Date().getHours() + cat.length);
-    }
+    const seed = new Date().getHours() + name.length;
+    currentVideos = rotate(data, seed);
+    allVideos = Object.values(window.cache || {}).flat();
 
-    currentList = cache[cat];
-    render();
-    highlightTab();
+    window.cache[name] = data;
+
+    updateUI();
   } catch {
-    alert("Category unavailable, switch to another.");
+    alert(`${name} unavailable. Try another category.`);
   }
 }
 
-// ---------- RENDER ----------
-function render() {
+// ---------- UI ----------
+function updateUI() {
+  document.getElementById("activeCategory").innerText = activeSource;
+
+  const sub = currentVideos[0]?.tags?.find(t=>t!==activeSource.toLowerCase());
+  document.getElementById("activeSubcategory").innerText =
+    sub ? `Subcategory: ${sub}` : "";
+
+  renderGrid(currentVideos);
+}
+
+function renderGrid(list) {
   const grid = document.getElementById("videoGrid");
   if (!grid) return;
 
   grid.innerHTML = "";
-  const start = (page - 1) * PER_PAGE;
-  const items = currentList.slice(start, start + PER_PAGE);
-
-  items.forEach(v => {
+  list.forEach(v=>{
     const d = document.createElement("div");
-    d.className = "card";
-    d.innerHTML = `
-      <img src="${v.thumbnailUrl}" loading="lazy">
+    d.className="card";
+    d.innerHTML=`
+      <img src="${v.thumbnailUrl}">
       <div class="info">
         <b>${v.title}</b><br>
         ${v.duration} • ${v.views} views
-      </div>`;
-    d.onclick = () => location = `watch.html?id=${v.id}`;
+      </div>
+    `;
+    d.onclick=()=>location=`watch.html?id=${v.id}`;
     grid.appendChild(d);
   });
-
-  pageInfo.innerText = `Page ${page}`;
-  prevBtn.disabled = page === 1;
-  nextBtn.disabled = start + PER_PAGE >= currentList.length;
 }
 
 // ---------- HEADER ----------
@@ -73,60 +70,72 @@ function initHeader() {
   const nav = document.getElementById("categoryTabs");
   if (!nav) return;
 
-  Object.keys(SOURCES).forEach(cat => {
-    const b = document.createElement("button");
-    b.innerText = cat;
-    b.onclick = () => loadCategory(cat);
+  Object.keys(SOURCES).forEach(name=>{
+    const b=document.createElement("button");
+    b.innerText=name;
+    b.onclick=()=>loadCategory(name);
     nav.appendChild(b);
   });
 }
 
-function highlightTab() {
-  document.querySelectorAll("nav button").forEach(b =>
-    b.classList.toggle("active", b.innerText === activeCategory)
-  );
+// ---------- SEARCH (ALL JSON FILES) ----------
+function initSearch() {
+  const s=document.getElementById("searchInput");
+  if(!s)return;
+
+  s.oninput=()=>{
+    const q=s.value.toLowerCase();
+    const merged=Object.values(window.cache).flat();
+    renderGrid(merged.filter(v=>v.title.toLowerCase().includes(q)));
+  };
 }
-
-// ---------- SEARCH (ALL JSONs) ----------
-searchInput?.addEventListener("input", e => {
-  const q = e.target.value.toLowerCase();
-  const merged = Object.values(cache).flat();
-  currentList = merged.filter(v => v.title.toLowerCase().includes(q));
-  page = 1;
-  render();
-});
-
-// ---------- PAGINATION ----------
-prevBtn?.addEventListener("click", () => { page--; render(); });
-nextBtn?.addEventListener("click", () => { page++; render(); });
 
 // ---------- WATCH PAGE ----------
 async function initWatch() {
-  const id = new URLSearchParams(location.search).get("id");
-  if (!id) return;
+  const id=new URLSearchParams(location.search).get("id");
+  if(!id)return;
 
-  for (const src of Object.values(SOURCES)) {
-    try {
-      const data = await (await fetch(src)).json();
-      const v = data.find(x => x.id === id);
-      if (v) {
-        player.src = v.embedUrl;
-        title.innerText = v.title;
-        description.innerText = v.description;
-        v.tags.forEach(t => {
-          const s = document.createElement("span");
-          s.innerText = `#${t} `;
+  for(const src of Object.values(SOURCES)){
+    try{
+      const res=await fetch(src);
+      const data=await res.json();
+      const v=data.find(x=>x.id===id);
+      if(v){
+        player.src=v.embedUrl;
+        title.innerText=v.title;
+        description.innerText=v.description;
+
+        v.tags.forEach(t=>{
+          const s=document.createElement("span");
+          s.innerText=`#${t}`;
           tags.appendChild(s);
         });
+
+        renderRelated(v,data);
         break;
       }
-    } catch {}
+    }catch{}
   }
 }
 
+function renderRelated(cur,all){
+  related.innerHTML="";
+  all.filter(v=>v.id!==cur.id && v.tags.some(t=>cur.tags.includes(t)))
+    .slice(0,6)
+    .forEach(v=>{
+      const d=document.createElement("div");
+      d.className="card";
+      d.innerHTML=`<img src="${v.thumbnailUrl}"><div class="info">${v.title}</div>`;
+      d.onclick=()=>location=`watch.html?id=${v.id}`;
+      related.appendChild(d);
+    });
+}
+
 // ---------- INIT ----------
-document.addEventListener("DOMContentLoaded", () => {
+window.cache={};
+document.addEventListener("DOMContentLoaded",()=>{
   initHeader();
-  loadCategory(activeCategory);
+  initSearch();
+  loadCategory(activeSource);
   initWatch();
 });
