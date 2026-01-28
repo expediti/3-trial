@@ -4,197 +4,138 @@ const SOURCES = {
   Lol49: "data/lol49.json"
 };
 
-let cache = {};
-let currentCategory = "Fuckmaza";
+let activeSource = "Fuckmaza";
+let allVideos = [];
 let currentVideos = [];
-let currentPage = 1;
-const PER_PAGE = 16;
 
-/* ========== SHUFFLE (Hourly Rotation) ========== */
+// ---------- HOURLY ROTATION ----------
 function rotate(arr, seed) {
-  return [...arr].sort((a, b) =>
-    (a.id.charCodeAt(0) + seed) - (b.id.charCodeAt(0))
+  return [...arr].sort((a,b)=>
+    (a.id.charCodeAt(0)+seed) - (b.id.charCodeAt(0))
   );
 }
 
-/* ========== LOAD CATEGORY ========== */
+// ---------- LOAD JSON ----------
 async function loadCategory(name) {
-  currentCategory = name;
-  currentPage = 1;
+  activeSource = name;
+  try {
+    const res = await fetch(SOURCES[name]);
+    const data = await res.json();
 
-  if (!cache[name]) {
-    try {
-      const res = await fetch(SOURCES[name]);
-      cache[name] = await res.json();
-    } catch (err) {
-      console.error("Failed to load category:", name, err);
-      return; 
-    }
+    const seed = new Date().getHours() + name.length;
+    currentVideos = rotate(data, seed);
+    allVideos = Object.values(window.cache || {}).flat();
+
+    window.cache[name] = data;
+
+    updateUI();
+  } catch {
+    alert(`${name} unavailable. Try another category.`);
   }
-
-  const seed = new Date().getHours() + name.length;
-  currentVideos = rotate(cache[name], seed);
-
-  updateCategoryUI();
-  renderGrid();
 }
 
-/* ========== CATEGORY HEADER ========== */
-function updateCategoryUI() {
-  const title = document.getElementById("activeCategory");
-  const sub = document.getElementById("activeSubcategory");
+// ---------- UI ----------
+function updateUI() {
+  document.getElementById("activeCategory").innerText = activeSource;
 
-  if (!title) return;
+  const sub = currentVideos[0]?.tags?.find(t=>t!==activeSource.toLowerCase());
+  document.getElementById("activeSubcategory").innerText =
+    sub ? `Subcategory: ${sub}` : "";
 
-  title.innerText = currentCategory;
-  const tag = currentVideos[0]?.tags?.find(t => t !== "xshiver");
-  sub.innerText = tag ? `Subcategory: ${tag}` : "";
+  renderGrid(currentVideos);
 }
 
-/* ========== GRID + PAGINATION (FIXED) ========== */
-function renderGrid(list = currentVideos) {
+function renderGrid(list) {
   const grid = document.getElementById("videoGrid");
-  const pageInfo = document.getElementById("pageInfo");
-  
-  // FIX: Explicitly get elements by ID to avoid ReferenceError
-  const prev = document.getElementById("prev"); 
-  const next = document.getElementById("next");
-
-  if (!grid) return; // Safely exit if grid doesn't exist (e.g. on watch.html)
-
-  const totalPages = Math.ceil(list.length / PER_PAGE);
-  if (currentPage > totalPages) currentPage = totalPages || 1;
-
-  const start = (currentPage - 1) * PER_PAGE;
-  const end = start + PER_PAGE;
-  const pageVideos = list.slice(start, end);
+  if (!grid) return;
 
   grid.innerHTML = "";
-
-  pageVideos.forEach(v => {
+  list.forEach(v=>{
     const d = document.createElement("div");
-    d.className = "card";
-    d.innerHTML = `
+    d.className="card";
+    d.innerHTML=`
       <img src="${v.thumbnailUrl}">
       <div class="info">
         <b>${v.title}</b><br>
         ${v.duration} • ${v.views} views
       </div>
     `;
-    d.onclick = () => location = `watch.html?id=${v.id}`;
+    d.onclick=()=>location=`watch.html?id=${v.id}`;
     grid.appendChild(d);
   });
-
-  if (pageInfo) pageInfo.innerText = `Page ${currentPage} of ${totalPages}`;
-
-  // FIX: Check if buttons exist before setting 'disabled' property
-  if (prev) prev.disabled = currentPage === 1;
-  if (next) next.disabled = currentPage === totalPages;
 }
 
-/* ========== BUTTONS (NO ERRORS) ========== */
-document.addEventListener("click", e => {
-  // Use optional chaining or checks to avoid errors
-  if (e.target && e.target.id === "prev") {
-    currentPage--;
-    renderGrid();
-    window.scrollTo(0, 0);
-  }
-  if (e.target && e.target.id === "next") {
-    currentPage++;
-    renderGrid();
-    window.scrollTo(0, 0);
-  }
-});
-
-/* ========== SEARCH (All JSON Files) ========== */
-function initSearch() {
-  const s = document.getElementById("searchInput");
-  if (!s) return;
-
-  s.oninput = () => {
-    const q = s.value.toLowerCase();
-    const all = Object.values(cache).flat();
-    currentPage = 1;
-    renderGrid(all.filter(v => v.title.toLowerCase().includes(q)));
-  };
-}
-
-/* ========== CATEGORY BUTTONS ========== */
+// ---------- HEADER ----------
 function initHeader() {
   const nav = document.getElementById("categoryTabs");
   if (!nav) return;
 
-  Object.keys(SOURCES).forEach(name => {
-    const b = document.createElement("button");
-    b.innerText = name;
-    b.onclick = () => loadCategory(name);
+  Object.keys(SOURCES).forEach(name=>{
+    const b=document.createElement("button");
+    b.innerText=name;
+    b.onclick=()=>loadCategory(name);
     nav.appendChild(b);
   });
 }
 
-/* ========== WATCH PAGE ========== */
+// ---------- SEARCH (ALL JSON FILES) ----------
+function initSearch() {
+  const s=document.getElementById("searchInput");
+  if(!s)return;
+
+  s.oninput=()=>{
+    const q=s.value.toLowerCase();
+    const merged=Object.values(window.cache).flat();
+    renderGrid(merged.filter(v=>v.title.toLowerCase().includes(q)));
+  };
+}
+
+// ---------- WATCH PAGE ----------
 async function initWatch() {
-  const id = new URLSearchParams(location.search).get("id");
-  if (!id) return;
+  const id=new URLSearchParams(location.search).get("id");
+  if(!id)return;
 
-  // Safe element selection
-  const player = document.getElementById("player");
-  const title = document.getElementById("title");
-  const description = document.getElementById("description");
-  const tags = document.getElementById("tags");
-  const relatedDiv = document.getElementById("related");
+  for(const src of Object.values(SOURCES)){
+    try{
+      const res=await fetch(src);
+      const data=await res.json();
+      const v=data.find(x=>x.id===id);
+      if(v){
+        player.src=v.embedUrl;
+        title.innerText=v.title;
+        description.innerText=v.description;
 
-  for (const [name, url] of Object.entries(SOURCES)) {
-    try {
-        const res = await fetch(url);
-        const data = await res.json();
-        const video = data.find(v => v.id === id);
+        v.tags.forEach(t=>{
+          const s=document.createElement("span");
+          s.innerText=`#${t}`;
+          tags.appendChild(s);
+        });
 
-        if (video) {
-        if (player) player.src = video.embedUrl;
-        if (title) title.innerText = video.title;
-        if (description) description.innerText = video.description;
-
-        if (tags) {
-            video.tags.forEach(t => {
-            const s = document.createElement("span");
-            s.innerText = `#${t}`;
-            tags.appendChild(s);
-            });
-        }
-
-        if (relatedDiv) {
-            const related = data.filter(v =>
-            v.id !== video.id &&
-            v.tags.some(t => video.tags.includes(t))
-            ).slice(0, 12);
-
-            related.forEach(v => {
-            const d = document.createElement("div");
-            d.className = "card";
-            d.innerHTML = `<img src="${v.thumbnailUrl}"><div class="info">${v.title}</div>`;
-            d.onclick = () => location = `watch.html?id=${v.id}`;
-            relatedDiv.appendChild(d);
-            });
-        }
+        renderRelated(v,data);
         break;
-        }
-    } catch(e) {
-        console.log("Error loading source for watch page", e);
-    }
+      }
+    }catch{}
   }
 }
 
-/* ========== INIT ========== */
-document.addEventListener("DOMContentLoaded", () => {
+function renderRelated(cur,all){
+  related.innerHTML="";
+  all.filter(v=>v.id!==cur.id && v.tags.some(t=>cur.tags.includes(t)))
+    .slice(0,6)
+    .forEach(v=>{
+      const d=document.createElement("div");
+      d.className="card";
+      d.innerHTML=`<img src="${v.thumbnailUrl}"><div class="info">${v.title}</div>`;
+      d.onclick=()=>location=`watch.html?id=${v.id}`;
+      related.appendChild(d);
+    });
+}
+
+// ---------- INIT ----------
+window.cache={};
+document.addEventListener("DOMContentLoaded",()=>{
   initHeader();
   initSearch();
-  
-  // Only load category if we are on the main page (grid exists)
-  if(document.getElementById("videoGrid")) {
-      loadCategory(currentCategory);
-  }
-  
+  loadCategory(activeSource);
   initWatch();
 });
