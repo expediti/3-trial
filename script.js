@@ -10,22 +10,21 @@ let currentVideos = [];
 let currentPage = 1;
 const PER_PAGE = 16;
 
-/* ---------- UTIL ---------- */
+/* ========== SHUFFLE (Hourly Rotation) ========== */
 function rotate(arr, seed) {
   return [...arr].sort((a, b) =>
     (a.id.charCodeAt(0) + seed) - (b.id.charCodeAt(0))
   );
 }
 
-/* ---------- CATEGORY ---------- */
+/* ========== LOAD CATEGORY ========== */
 async function loadCategory(name) {
   currentCategory = name;
   currentPage = 1;
 
   if (!cache[name]) {
     const res = await fetch(SOURCES[name]);
-    const data = await res.json();
-    cache[name] = data;
+    cache[name] = await res.json();
   }
 
   const seed = new Date().getHours() + name.length;
@@ -35,7 +34,7 @@ async function loadCategory(name) {
   renderGrid();
 }
 
-/* ---------- UI ---------- */
+/* ========== CATEGORY HEADER ========== */
 function updateCategoryUI() {
   const title = document.getElementById("activeCategory");
   const sub = document.getElementById("activeSubcategory");
@@ -43,19 +42,18 @@ function updateCategoryUI() {
   if (!title) return;
 
   title.innerText = currentCategory;
-
   const tag = currentVideos[0]?.tags?.find(t => t !== "xshiver");
   sub.innerText = tag ? `Subcategory: ${tag}` : "";
 }
 
-/* ---------- GRID + PAGINATION ---------- */
+/* ========== GRID + PAGINATION ========== */
 function renderGrid(list = currentVideos) {
   const grid = document.getElementById("videoGrid");
   const pageInfo = document.getElementById("pageInfo");
   const prev = document.getElementById("prev");
   const next = document.getElementById("next");
 
-  if (!grid) return; // watch page safe
+  if (!grid) return; // watch.html safe
 
   const totalPages = Math.ceil(list.length / PER_PAGE);
   if (currentPage > totalPages) currentPage = totalPages || 1;
@@ -85,7 +83,7 @@ function renderGrid(list = currentVideos) {
   if (next) next.disabled = currentPage === totalPages;
 }
 
-/* ---------- PAGINATION ---------- */
+/* ========== BUTTONS (NO ERRORS) ========== */
 document.addEventListener("click", e => {
   if (e.target.id === "prev") {
     currentPage--;
@@ -99,7 +97,7 @@ document.addEventListener("click", e => {
   }
 });
 
-/* ---------- SEARCH (ALL JSONs) ---------- */
+/* ========== SEARCH (All JSON Files) ========== */
 function initSearch() {
   const s = document.getElementById("searchInput");
   if (!s) return;
@@ -112,7 +110,7 @@ function initSearch() {
   };
 }
 
-/* ---------- HEADER ---------- */
+/* ========== CATEGORY BUTTONS ========== */
 function initHeader() {
   const nav = document.getElementById("categoryTabs");
   if (!nav) return;
@@ -125,7 +123,7 @@ function initHeader() {
   });
 }
 
-/* ---------- WATCH PAGE ---------- */
+/* ========== WATCH PAGE ========== */
 async function initWatch() {
   const id = new URLSearchParams(location.search).get("id");
   if (!id) return;
@@ -164,7 +162,7 @@ async function initWatch() {
   }
 }
 
-/* ---------- INIT ---------- */
+/* ========== INIT ========== */
 document.addEventListener("DOMContentLoaded", () => {
   initHeader();
   initSearch();
