@@ -8,19 +8,22 @@ body{background:#0f0f0f;color:white}
   padding:10px;
   background:#202020;
 }
-.logo{font-size:22px;font-weight:bold}
+.logo{font-size:22px;font-weight:bold;color:white;text-decoration:none}
 .logo span{color:#3ea6ff}
-.search-box{
-  flex:1;
-  display:flex;
-  justify-content:center;
-}
+.search-box{flex:1;display:flex;justify-content:center}
 .search-box input{
   width:70%;
   padding:8px;
   background:#111;
   border:1px solid #333;
   color:white;
+}
+
+/* ADS */
+.ad-banner{
+  display:flex;
+  justify-content:center;
+  margin:10px 0;
 }
 
 /* CATEGORY BAR */
@@ -30,13 +33,6 @@ body{background:#0f0f0f;color:white}
   background:#181818;
   padding:10px;
 }
-.category-bar button{
-  background:none;
-  border:none;
-  color:#aaa;
-  font-size:16px;
-}
-.category-bar button.active{color:white;border-bottom:2px solid #3ea6ff}
 
 /* GRID */
 .video-grid{
@@ -51,18 +47,9 @@ body{background:#0f0f0f;color:white}
   .video-grid{grid-template-columns:repeat(auto-fill,minmax(220px,1fr))}
 }
 
-.card{
+.card,.ad-tile{
   background:#1e1e1e;
-  cursor:pointer;
-}
-.card img{
-  width:100%;
-  aspect-ratio:16/9;
-  object-fit:cover;
-}
-.card .info{
-  padding:6px;
-  font-size:14px;
+  height:180px;
 }
 
 /* PAGINATION */
@@ -79,18 +66,18 @@ body{background:#0f0f0f;color:white}
   border:none;
 }
 
+/* VIDEO ADS */
+.video-ads{
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
+  gap:10px;
+  padding:12px;
+}
+
 /* WATCH */
-.watch-page{
-  display:flex;
-  flex-wrap:wrap;
-}
-.player-box{
-  flex:1;
-  padding:10px;
-}
-.related-section{
-  width:100%;
-}
+.watch-page{display:flex;flex-wrap:wrap}
+.player-box{flex:1;padding:10px}
+.related-section{width:100%}
 @media(min-width:900px){
   .related-section{width:35%}
 }
