@@ -4,81 +4,197 @@ const SOURCES = {
   Lol49: "data/lol49.json"
 };
 
-let activeCategory = "Fuckmaza";
 let cache = {};
+let currentCategory = "Fuckmaza";
 let currentVideos = [];
-let page = 1;
+let currentPage = 1;
 const PER_PAGE = 16;
 
+/* ========== SHUFFLE (Hourly Rotation) ========== */
 function rotate(arr, seed) {
-  return [...arr].sort((a,b)=> (a.id.charCodeAt(0)+seed)-(b.id.charCodeAt(0)));
+  return [...arr].sort((a, b) =>
+    (a.id.charCodeAt(0) + seed) - (b.id.charCodeAt(0))
+  );
 }
 
-async function loadCategory(name){
-  activeCategory=name;
-  page=1;
+/* ========== LOAD CATEGORY ========== */
+async function loadCategory(name) {
+  currentCategory = name;
+  currentPage = 1;
 
-  if(!cache[name]){
-    const res = await fetch(SOURCES[name]);
-    const data = await res.json();
-    const seed = new Date().getHours()+name.length;
-    cache[name] = rotate(data,seed);
+  if (!cache[name]) {
+    try {
+      const res = await fetch(SOURCES[name]);
+      cache[name] = await res.json();
+    } catch (err) {
+      console.error("Failed to load category:", name, err);
+      return; 
+    }
   }
 
-  currentVideos = cache[name];
+  const seed = new Date().getHours() + name.length;
+  currentVideos = rotate(cache[name], seed);
+
   updateCategoryUI();
-  renderPage();
+  renderGrid();
 }
 
-function updateCategoryUI(){
-  document.getElementById("activeCategory").innerText = activeCategory;
-  const tag = currentVideos[0]?.tags?.[1];
-  document.getElementById("activeSubcategory").innerText = tag ? "Subcategory: "+tag : "";
+/* ========== CATEGORY HEADER ========== */
+function updateCategoryUI() {
+  const title = document.getElementById("activeCategory");
+  const sub = document.getElementById("activeSubcategory");
+
+  if (!title) return;
+
+  title.innerText = currentCategory;
+  const tag = currentVideos[0]?.tags?.find(t => t !== "xshiver");
+  sub.innerText = tag ? `Subcategory: ${tag}` : "";
 }
 
-function renderPage(){
+/* ========== GRID + PAGINATION (FIXED) ========== */
+function renderGrid(list = currentVideos) {
   const grid = document.getElementById("videoGrid");
+  const pageInfo = document.getElementById("pageInfo");
+  
+  // FIX: Explicitly get elements by ID to avoid ReferenceError
+  const prev = document.getElementById("prev"); 
+  const next = document.getElementById("next");
+
+  if (!grid) return; // Safely exit if grid doesn't exist (e.g. on watch.html)
+
+  const totalPages = Math.ceil(list.length / PER_PAGE);
+  if (currentPage > totalPages) currentPage = totalPages || 1;
+
+  const start = (currentPage - 1) * PER_PAGE;
+  const end = start + PER_PAGE;
+  const pageVideos = list.slice(start, end);
+
   grid.innerHTML = "";
 
-  const start=(page-1)*PER_PAGE;
-  const items=currentVideos.slice(start,start+PER_PAGE);
-
-  items.forEach(v=>{
-    const d=document.createElement("div");
-    d.className="card";
-    d.innerHTML=`<img src="${v.thumbnailUrl}"><div class="info">${v.title}</div>`;
-    d.onclick=()=>location=`watch.html?id=${v.id}`;
+  pageVideos.forEach(v => {
+    const d = document.createElement("div");
+    d.className = "card";
+    d.innerHTML = `
+      <img src="${v.thumbnailUrl}">
+      <div class="info">
+        <b>${v.title}</b><br>
+        ${v.duration} • ${v.views} views
+      </div>
+    `;
+    d.onclick = () => location = `watch.html?id=${v.id}`;
     grid.appendChild(d);
   });
 
-  const totalPages=Math.ceil(currentVideos.length/PER_PAGE);
-  document.getElementById("pageInfo").innerText=`Page ${page} of ${totalPages}`;
-  prevBtn.disabled=page===1;
-  nextBtn.disabled=page>=totalPages;
+  if (pageInfo) pageInfo.innerText = `Page ${currentPage} of ${totalPages}`;
+
+  // FIX: Check if buttons exist before setting 'disabled' property
+  if (prev) prev.disabled = currentPage === 1;
+  if (next) next.disabled = currentPage === totalPages;
 }
 
-prevBtn.onclick=()=>{page--;renderPage()};
-nextBtn.onclick=()=>{page++;renderPage()};
+/* ========== BUTTONS (NO ERRORS) ========== */
+document.addEventListener("click", e => {
+  // Use optional chaining or checks to avoid errors
+  if (e.target && e.target.id === "prev") {
+    currentPage--;
+    renderGrid();
+    window.scrollTo(0, 0);
+  }
+  if (e.target && e.target.id === "next") {
+    currentPage++;
+    renderGrid();
+    window.scrollTo(0, 0);
+  }
+});
 
-function initCategories(){
-  const nav=document.getElementById("categoryTabs");
-  Object.keys(SOURCES).forEach(c=>{
-    const b=document.createElement("button");
-    b.innerText=c;
-    b.onclick=()=>loadCategory(c);
+/* ========== SEARCH (All JSON Files) ========== */
+function initSearch() {
+  const s = document.getElementById("searchInput");
+  if (!s) return;
+
+  s.oninput = () => {
+    const q = s.value.toLowerCase();
+    const all = Object.values(cache).flat();
+    currentPage = 1;
+    renderGrid(all.filter(v => v.title.toLowerCase().includes(q)));
+  };
+}
+
+/* ========== CATEGORY BUTTONS ========== */
+function initHeader() {
+  const nav = document.getElementById("categoryTabs");
+  if (!nav) return;
+
+  Object.keys(SOURCES).forEach(name => {
+    const b = document.createElement("button");
+    b.innerText = name;
+    b.onclick = () => loadCategory(name);
     nav.appendChild(b);
   });
 }
 
-searchInput.oninput=()=>{
-  const q=searchInput.value.toLowerCase();
-  const all=Object.values(cache).flat();
-  currentVideos = all.filter(v=>v.title.toLowerCase().includes(q));
-  page=1;
-  renderPage();
-};
+/* ========== WATCH PAGE ========== */
+async function initWatch() {
+  const id = new URLSearchParams(location.search).get("id");
+  if (!id) return;
 
-document.addEventListener("DOMContentLoaded",()=>{
-  initCategories();
-  loadCategory(activeCategory);
+  // Safe element selection
+  const player = document.getElementById("player");
+  const title = document.getElementById("title");
+  const description = document.getElementById("description");
+  const tags = document.getElementById("tags");
+  const relatedDiv = document.getElementById("related");
+
+  for (const [name, url] of Object.entries(SOURCES)) {
+    try {
+        const res = await fetch(url);
+        const data = await res.json();
+        const video = data.find(v => v.id === id);
+
+        if (video) {
+        if (player) player.src = video.embedUrl;
+        if (title) title.innerText = video.title;
+        if (description) description.innerText = video.description;
+
+        if (tags) {
+            video.tags.forEach(t => {
+            const s = document.createElement("span");
+            s.innerText = `#${t}`;
+            tags.appendChild(s);
+            });
+        }
+
+        if (relatedDiv) {
+            const related = data.filter(v =>
+            v.id !== video.id &&
+            v.tags.some(t => video.tags.includes(t))
+            ).slice(0, 12);
+
+            related.forEach(v => {
+            const d = document.createElement("div");
+            d.className = "card";
+            d.innerHTML = `<img src="${v.thumbnailUrl}"><div class="info">${v.title}</div>`;
+            d.onclick = () => location = `watch.html?id=${v.id}`;
+            relatedDiv.appendChild(d);
+            });
+        }
+        break;
+        }
+    } catch(e) {
+        console.log("Error loading source for watch page", e);
+    }
+  }
+}
+
+/* ========== INIT ========== */
+document.addEventListener("DOMContentLoaded", () => {
+  initHeader();
+  initSearch();
+  
+  // Only load category if we are on the main page (grid exists)
+  if(document.getElementById("videoGrid")) {
+      loadCategory(currentCategory);
+  }
+  
+  initWatch();
 });
