@@ -1,32 +1,44 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <title>StreamHub</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <link rel="stylesheet" href="style.css" />
+<meta charset="UTF-8">
+<title>StreamHub</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-<header>
+<header class="top-header">
   <div class="logo">Stream<span>Hub</span></div>
-
-  <nav id="categoryTabs">
-    <!-- injected by JS -->
-  </nav>
-
-  <input id="searchInput" placeholder="Search videos..." />
+  <div class="search-box">
+    <input id="searchInput" placeholder="Search videos...">
+  </div>
 </header>
 
+<nav class="category-bar" id="categoryTabs"></nav>
+
 <section class="category-info">
-  <h2 id="activeCategory">Loading…</h2>
+  <h2 id="activeCategory"></h2>
   <p id="activeSubcategory"></p>
 </section>
 
-<main id="videoGrid" class="grid"></main>
+<main>
+  <div id="videoGrid" class="video-grid"></div>
+  <div class="pagination">
+    <button id="prev">Previous</button>
+    <span id="pageInfo"></span>
+    <button id="next">Next</button>
+  </div>
+</main>
 
 <footer>
-  © 2026 StreamHub
+  <div class="socials">
+    <a href="#">YouTube</a>
+    <a href="#">Telegram</a>
+    <a href="#">Twitter</a>
+    <a href="#">Instagram</a>
+  </div>
+  <p>© 2026 StreamHub</p>
 </footer>
 
 <script src="app.js"></script>
