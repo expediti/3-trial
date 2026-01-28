@@ -1,65 +1,34 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Xshiver - Video Streaming</title>
-    <link rel="stylesheet" href="style.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <meta charset="UTF-8" />
+  <title>StreamHub</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="style.css" />
 </head>
-<body class="page-home">
+<body>
 
-    <header>
-        <div class="logo"><a href="index.html"> <span class="highlight">Xshiver</span></a></div>
-        <div class="search-bar">
-            <input type="text" id="searchInput" placeholder="Search videos...">
-            <button onclick="performSearch()"><i class="fas fa-search"></i></button>
-        </div>
-        <!-- <div class="mobile-menu-btn"><i class="fas fa-bars"></i></div> -->
-    </header>
+<header>
+  <div class="logo">Stream<span>Hub</span></div>
 
-    <main class="container">
-        <aside class="sidebar">
-            <div class="filter-section">
+  <nav id="categoryTabs">
+    <!-- injected by JS -->
+  </nav>
 
-<option value="all">All Categories</option>
+  <input id="searchInput" placeholder="Search videos..." />
+</header>
 
-                <select id="tagFilter" onchange="applyFilter()">
+<section class="category-info">
+  <h2 id="activeCategory">Loading…</h2>
+  <p id="activeSubcategory"></p>
+</section>
 
+<main id="videoGrid" class="grid"></main>
 
-                </select>
-            </div>
-            
-            <div class="trending-section">
-                <h3><i class="fas fa-fire"></i> Trending Now</h3>
-                <div id="sidebar-list">
-                    </div>
-            </div>
-        </aside>
+<footer>
+  © 2026 StreamHub
+</footer>
 
-        <section class="content-area">
-            <div id="video-grid" class="video-grid">
-                </div>
-
-            <div class="pagination">
-                <button id="prevBtn" onclick="changePage(-1)">Previous</button>
-                <span id="pageIndicator">Page 1</span>
-                <button id="nextBtn" onclick="changePage(1)">Next</button>
-            </div>
-        </section>
-    </main>
-
-    <footer>
-        <div class="footer-content">
-            <p>&copy; 2026 Xshiver. All rights reserved.</p>
-            <div class="footer-links">
-                <a href="#">Privacy Policy</a>
-                <a href="#">Terms of Service</a>
-                <a href="#">Contact</a>
-            </div>
-        </div>
-    </footer>
-
-    <script src="script.js"></script>
+<script src="app.js"></script>
 </body>
 </html>
