@@ -4,33 +4,30 @@
   <meta charset="UTF-8" />
   <title>StreamHub</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
-  <!-- Favicon -->
-  <link rel="icon" type="image/png" href="assets/favicon.png" />
-
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
 
 <header>
-  <div class="logo">
-    <img src="assets/logo.png" alt="StreamHub Logo" />
-  </div>
+  <div class="logo">Stream<span>Hub</span></div>
 
-  <nav id="categoryTabs"></nav>
+  <nav id="categoryTabs">
+    <!-- injected by JS -->
+  </nav>
 
   <input id="searchInput" placeholder="Search videos..." />
 </header>
 
+<section class="category-info">
+  <h2 id="activeCategory">Loading…</h2>
+  <p id="activeSubcategory"></p>
+</section>
+
 <main id="videoGrid" class="grid"></main>
 
-<div class="pagination">
-  <button id="prevBtn">Prev</button>
-  <span id="pageInfo"></span>
-  <button id="nextBtn">Next</button>
-</div>
-
-<footer>© 2026 StreamHub</footer>
+<footer>
+  © 2026 StreamHub
+</footer>
 
 <script src="app.js"></script>
 </body>
