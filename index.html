@@ -1,47 +1,50 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<title>StreamHub</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<link rel="stylesheet" href="style.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>XSHIVER</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-<header class="top-header">
-  <div class="logo">Stream<span>Hub</span></div>
-  <div class="search-box">
-    <input id="searchInput" placeholder="Search videos...">
-  </div>
-</header>
+    <header>
+        <div class="header-top">
+            <a href="index.html" class="logo">XSHIVER</a>
+            
+            <a href="pro.html" class="btn-pro">
+                GET PRO ₹99
+                <span>150+ Videos Bundle</span>
+            </a>
+        </div>
 
-<nav class="category-bar" id="categoryTabs"></nav>
+        <div class="search-container">
+            <input type="text" id="searchInput" class="search-input" placeholder="Search videos...">
+        </div>
 
-<section class="category-info">
-  <h2 id="activeCategory"></h2>
-  <p id="activeSubcategory"></p>
-</section>
+        <nav class="category-scroll" id="categoryTabs">
+            </nav>
+    </header>
 
-<main>
-  <div id="videoGrid" class="video-grid"></div>
+    <main>
+        <div class="video-grid" id="videoGrid">
+            </div>
 
-  <div class="pagination">
-    <button id="prevBtn">Previous</button>
-    <span id="pageInfo"></span>
-    <button id="nextBtn">Next</button>
-  </div>
-</main>
+        <div class="pagination">
+            <button id="prev">Prev</button>
+            <span id="pageInfo">1 / 10</span>
+            <button id="next">Next</button>
+        </div>
+    </main>
 
-<footer>
-  <div class="socials">
-    <a href="#">YouTube</a>
-    <a href="#">Telegram</a>
-    <a href="#">Instagram</a>
-    <a href="#">Twitter</a>
-  </div>
-  <p>© 2026 StreamHub</p>
-</footer>
+    <footer>
+        <div class="social-links">
+            <a href="#">Instagram</a>
+            <a href="#">Telegram</a>
+        </div>
+        <p style="margin-top:10px; opacity:0.5;">&copy; 2026 XSHIVER</p>
+    </footer>
 
-<script src="app.js"></script>
+    <script src="app.js"></script>
 </body>
 </html>
