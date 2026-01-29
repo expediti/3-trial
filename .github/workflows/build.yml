@@ -6,18 +6,25 @@ on:
       - videos.json
       - watch-template.html
 
+permissions:
+  contents: write
+
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
+
       - uses: actions/setup-node@v3
         with:
           node-version: 18
+
       - run: node build.js
-      - run: |
-          git config --global user.name "seo-bot"
-          git config --global user.email "bot@github.com"
+
+      - name: Commit and push
+        run: |
+          git config user.name "seo-bot"
+          git config user.email "bot@github.com"
           git add .
-          git commit -m "Auto build pages"
+          git commit -m "Auto build video pages" || exit 0
           git push
