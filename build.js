@@ -17,7 +17,7 @@ data.forEach(v=>{
   const filename = `watch/${v.id}.html`;
   fs.writeFileSync(filename, html);
 
-  urls.push(`https://yourdomain.com/${filename}`);
+  urls.push(`https://xshiver.site/${filename}`);
 });
 
 // Delete removed pages
