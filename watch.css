@@ -1,0 +1,99 @@
+:root {
+  --bg-main:#0a0a1a;
+  --bg-card:#151525;
+  --text:#fff;
+  --muted:#a0a0b0;
+  --accent:#00b4ff;
+  --radius:12px;
+}
+
+*{margin:0;padding:0;box-sizing:border-box;}
+
+body{
+  background:var(--bg-main);
+  color:var(--text);
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial;
+}
+
+/* Header */
+.watch-header{
+  padding:14px;
+  border-bottom:1px solid #222;
+}
+.logo{
+  color:var(--accent);
+  font-weight:800;
+  font-size:1.4rem;
+  text-decoration:none;
+}
+
+/* Container */
+.watch-container{
+  max-width:1000px;
+  margin:auto;
+  padding:15px;
+}
+
+/* Title */
+.video-title{
+  font-size:1.1rem;
+  margin-bottom:12px;
+}
+
+/* Video */
+.video-wrapper{
+  width:100%;
+  background:black;
+  border-radius:var(--radius);
+  overflow:hidden;
+}
+.video-wrapper video{
+  width:100%;
+  height:auto;
+  max-height:70vh;
+  object-fit:contain;
+}
+
+/* Description */
+.video-desc{
+  margin:12px 0;
+  color:var(--muted);
+  font-size:0.9rem;
+}
+
+/* Suggestions */
+.suggest-title{
+  margin:15px 0 10px;
+  font-size:1rem;
+}
+
+.suggest-grid{
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
+  gap:12px;
+}
+
+@media (min-width:768px){
+  .suggest-grid{
+    grid-template-columns:repeat(4,1fr);
+  }
+}
+
+.suggest-card{
+  background:var(--bg-card);
+  border-radius:var(--radius);
+  overflow:hidden;
+  cursor:pointer;
+}
+
+.suggest-thumb{
+  width:100%;
+  aspect-ratio:16/9;
+  object-fit:cover;
+}
+
+.suggest-title-small{
+  padding:8px;
+  font-size:0.75rem;
+  line-height:1.3;
+}
