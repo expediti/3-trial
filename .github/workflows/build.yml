@@ -1,0 +1,23 @@
+name: Build Video Pages
+
+on:
+  push:
+    paths:
+      - videos.json
+      - watch-template.html
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 18
+      - run: node build.js
+      - run: |
+          git config --global user.name "seo-bot"
+          git config --global user.email "bot@github.com"
+          git add .
+          git commit -m "Auto build pages"
+          git push
