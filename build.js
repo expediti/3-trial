@@ -1,8 +1,20 @@
 const fs = require("fs");
+const path = require("path");
+
 const data = JSON.parse(fs.readFileSync("videos.json","utf8"));
 const template = fs.readFileSync("watch-template.html","utf8");
 
-if (!fs.existsSync("watch")) fs.mkdirSync("watch");
+const outDir = "watch";
+
+// Ensure watch folder exists
+if (!fs.existsSync(outDir)) {
+  fs.mkdirSync(outDir, { recursive: true });
+}
+
+// Clean old pages
+for (const f of fs.readdirSync(outDir)) {
+  fs.unlinkSync(path.join(outDir, f));
+}
 
 let urls = [];
 
@@ -12,19 +24,12 @@ data.forEach(v=>{
     .replace(/{{DESCRIPTION}}/g, v.description)
     .replace(/{{THUMB}}/g, v.thumbnailUrl)
     .replace(/{{VIDEO}}/g, v.embedUrl)
-    .replace(/{{TAGS}}/g, v.tags.join(", "));
+    .replace(/{{TAGS}}/g, (v.tags || []).join(", "));
 
-  const filename = `watch/${v.id}.html`;
-  fs.writeFileSync(filename, html);
+  const file = path.join(outDir, `${v.id}.html`);
+  fs.writeFileSync(file, html);
 
-  urls.push(`https://xshiver.site/${filename}`);
-});
-
-// Delete removed pages
-fs.readdirSync("watch").forEach(f=>{
-  if(!data.find(v=>`${v.id}.html`===f)){
-    fs.unlinkSync("watch/"+f);
-  }
+  urls.push(`https://expediti.github.io/xshiver3-trial/watch/${v.id}.html`);
 });
 
 // Build sitemap
@@ -36,4 +41,4 @@ sitemap += "</urlset>";
 
 fs.writeFileSync("sitemap.xml", sitemap);
 
-console.log("Pages + Sitemap built successfully");
+console.log("All pages and sitemap built successfully.");
