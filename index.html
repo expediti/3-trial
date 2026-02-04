@@ -1,28 +1,61 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-K5PXH0YEB7"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-K5PXH0YEB7');
+    </script>
 
-
-
-<!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-K5PXH0YEB7"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-
-  gtag('config', 'G-K5PXH0YEB7');
-</script>
-
-
-
-
-
-    
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>XSHIVER</title>
+    
+    <title>XSHIVER - Watch Free HD Viral Videos</title>
+    <meta name="description" content="Watch the latest viral videos, leaked content, and trending clips in HD on XSHIVER. Daily updates, fast streaming, and premium content for free.">
+    <meta name="keywords" content="viral videos, indian viral mms, full porn hd, xxx, indian viral porn, indian viral mms, indian viral big boobs girl, indian big boobs mms, indian mms leaked, indian girl nude, nude girl, full mms, indian telegram viral, telegram leaked mms, instagram leaked viral mms, indian girl fingering, indian girl showing big boobs, girl chudai, girl indian xxx, indian xxx, indian bur chudai, indian gand chudai, indian girl nude boobs, indian girl showing boobs, indian girl mms, full hd viral mms, indian girl showing nude boobs, indian fucking xxx, indian viral mms, leaked videos, desi viral, telegram viral, trending clips, xshiver, hd video streaming">
+    <meta name="robots" content="index, follow">
+    <meta name="author" content="XSHIVER">
+
+    <meta property="og:title" content="XSHIVER - Viral & Premium Videos">
+    <meta property="og:description" content="Watch trending viral videos for free on XSHIVER.">
+    <meta property="og:image" content="https://xshiver.online/logo.svg">
+    <meta property="og:url" content="https://xshiver.online">
+    <meta property="og:type" content="website">
+
+    <link rel="icon" href="favicon.svg" type="image/svg+xml">
     <link rel="stylesheet" href="style.css">
+
+    <style>
+        .popup-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.95); z-index: 9999;
+            backdrop-filter: blur(10px);
+            display: flex; justify-content: center; align-items: center;
+            padding: 20px;
+        }
+        .popup-content {
+            background: #1a1a24; border: 2px solid #00b4ff;
+            border-radius: 16px; padding: 30px 20px; width: 100%; max-width: 400px;
+            text-align: center; box-shadow: 0 0 30px rgba(0, 180, 255, 0.2);
+        }
+        .popup-btn-group {
+            display: flex; gap: 15px; justify-content: center; margin-top: 20px;
+        }
+        .btn-yes {
+            background: #00b4ff; color: white; border: none;
+            padding: 12px 24px; border-radius: 8px; font-weight: bold;
+            cursor: pointer; flex: 1; text-transform: uppercase;
+        }
+        .btn-no {
+            background: #333; color: #aaa; border: 1px solid #555;
+            padding: 12px 24px; border-radius: 8px; font-weight: bold;
+            cursor: pointer; flex: 1; text-transform: uppercase;
+        }
+        .btn-yes:hover { box-shadow: 0 0 15px rgba(0, 180, 255, 0.4); }
+        .btn-no:hover { background: #444; color: white; }
+    </style>
 </head>
 <body>
 
@@ -41,12 +74,12 @@
         </div>
 
         <nav class="category-scroll" id="categoryTabs">
-            </nav>
+        </nav>
     </header>
 
     <main>
         <div class="video-grid" id="videoGrid">
-            </div>
+        </div>
 
         <div class="pagination">
             <button id="prev">Prev</button>
@@ -62,6 +95,46 @@
         </div>
         <p style="margin-top:10px; opacity:0.5;">&copy; 2026 XSHIVER</p>
     </footer>
+
+    <div id="agePopup" class="popup-overlay" style="display: flex;"> <div class="popup-content">
+            <div style="font-size: 40px; margin-bottom: 10px;">🔞</div>
+            <h2 style="color:white; margin-bottom:10px;">AGE RESTRICTED</h2>
+            <p style="color:#aaa; font-size:0.9rem; line-height:1.4;">
+                This website contains material restricted to adults. 
+                <br><strong>Are you 18 years of age or older?</strong>
+            </p>
+            
+            <div class="popup-btn-group">
+                <button class="btn-no" onclick="leaveSite()">NO</button>
+                <button class="btn-yes" onclick="enterSite()">YES</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Check if user already Verified
+        document.addEventListener("DOMContentLoaded", () => {
+            const isVerified = localStorage.getItem("xshiver_age_verified");
+            const popup = document.getElementById("agePopup");
+            
+            if (isVerified === "true") {
+                popup.style.display = "none"; // Hide if verified
+            } else {
+                popup.style.display = "flex"; // Show if new
+            }
+        });
+
+        function enterSite() {
+            // Save verification and close popup
+            localStorage.setItem("xshiver_age_verified", "true");
+            document.getElementById("agePopup").style.display = "none";
+        }
+
+        function leaveSite() {
+            // Redirect away
+            window.location.href = "https://www.google.com";
+        }
+    </script>
 
     <script src="app.js"></script>
 </body>
